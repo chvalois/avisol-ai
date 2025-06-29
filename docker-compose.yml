@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: openwebui-postgres
+    environment:
+      POSTGRES_DB: openwebui_db
+      POSTGRES_USER: openwebui_user
+      POSTGRES_PASSWORD: SecurePass123!
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openwebui_user -d openwebui_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - openwebui-network
+
+  # Ollama Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: openwebui-ollama
+    volumes:
+      - ./volumes/ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+    restart: unless-stopped
+    networks:
+      - openwebui-network
+
+  # Open WebUI with PostgreSQL
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: openwebui-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - WEBUI_SECRET_KEY=super-secret-key-minimum-32-characters-long-for-security
+      - DATABASE_URL=postgresql://openwebui_user:SecurePass123!@postgres:5432/openwebui_db
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    volumes:
+      - ./volumes/openwebui:/app/backend/data
+    restart: unless-stopped
+    networks:
+      - openwebui-network
+
+networks:
+  openwebui-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  ollama_data:
+  openwebui_data:

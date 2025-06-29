@@ -1,0 +1,47 @@
+# Fichiers système
+.DS_Store
+Thumbs.db
+*.log
+
+# Environnements virtuels
+venv/
+env/
+.env
+.venv/
+
+# Data sources
+data/
+
+# volumes content
+volumes/ollama/*
+volumes/openwebui/*
+volumes/postgres/*
+
+# Dépendances Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.so
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Docker
+.dockerignore
