@@ -11,6 +11,7 @@ services:
       POSTGRES_PASSWORD: SecurePass123!
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
     ports:
       - "5432:5432"
     restart: unless-stopped
@@ -35,6 +36,14 @@ services:
     restart: unless-stopped
     networks:
       - openwebui-network
+        # AJOUT GPU
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
   # Open WebUI with PostgreSQL
   open-webui:
@@ -58,6 +67,44 @@ services:
     restart: unless-stopped
     networks:
       - openwebui-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    
+
+# MCPO - MCP to OpenAPI Proxy
+  mcpo:
+    image: ghcr.io/open-webui/mcpo:main
+    container_name: avisol-mcpo
+    ports:
+      - "${MCPO_PORT:-8000}:8000"
+    environment:
+      - API_KEY=${MCPO_API_KEY}
+    volumes:
+      - ./config/mcpo-config.json:/app/config.json:ro
+    command: [
+      "--host", "0.0.0.0",
+      "--port", "8000", 
+      "--api-key", "${MCPO_API_KEY}",
+      "--config", "/app/config.json"
+    ]
+    networks:
+      - openwebui-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
 
 networks:
   openwebui-network:
