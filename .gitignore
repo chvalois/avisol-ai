@@ -12,6 +12,9 @@ env/
 # Data sources
 data/
 
+# MCPO Config
+config/*
+
 # volumes content
 volumes/ollama/*
 volumes/openwebui/*

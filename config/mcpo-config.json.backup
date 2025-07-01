@@ -2,18 +2,14 @@
   "mcpServers": {
     "postgres": {
       "command": "npx",
-      "args": ["-y", "@henkey/postgres-mcp-server"],
-      "env": {
-        "POSTGRES_CONNECTION_STRING": "postgresql://openwebui_user:SecurePass123!@postgres:5432/openwebui_db",
-        "POSTGRES_SCHEMA": "public",
-        "POSTGRES_MAX_CONNECTIONS": "10"
-      },
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://openwebui_user:SecurePass123!@postgres:5432/openwebui_db"],
       "timeout": 30000,
       "retries": 3
     }
   },
   "global": {
-    "timeout": 10000,
-    "maxConcurrentRequests": 5
+    "timeout": 15000,
+    "maxConcurrentRequests": 5,
+    "logLevel": "debug"
   }
 }
